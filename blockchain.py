@@ -40,11 +40,11 @@ class Block:
     # default print statement for instantiated block
     def __str__(self):
         return (
-          f'Block: {self.number}\n' +
-          f'Hash: {self.hash()}\n' +
-          f'Previous: {self.previousHash}\n' +
-          f'Data: {self.data}\n' +
-          f'Nonce: {self.nonce}'
+            f"Block: {self.number}\n"
+            + f"Hash: {self.hash()}\n"
+            + f"Previous: {self.previousHash}\n"
+            + f"Data: {self.data}\n"
+            + f"Nonce: {self.nonce}"
         )
 
 
@@ -54,8 +54,10 @@ class Blockchain:
     difficulty = 4
 
     def __init__(self, chain=[]):
+        # chain for storing stack of blocks
         self.chain = chain
 
+    # method that adds block data to chain
     def add(self, block):
         self.chain.append(
             {
@@ -67,17 +69,42 @@ class Blockchain:
             }
         )
 
+    # method for mining blocks
+    def mine(self, block):
+        # looks for previous block to chain to
+        # if none, it is first block and has no previous block
+        try:
+            block.previousHash = self.chain[-1].get("hash")
+        except IndexError:
+            pass
+
+        # looks for amount of preceding zeroes in hash
+        # based on difficulty (e.g. difficulty of 4 equals 0000)
+        while True:
+            if block.hash()[:(self.difficulty)] == "0" * self.difficulty:
+                self.add(block)
+                break
+            else:
+                # nonce is increased every time produced hash fails
+                block.nonce += 1
+
     def __str__(self):
-      return str(self.chain)
+        return str(self.chain)
 
 
 # executes upon program start
+# test blockchain with random set of data
 def main():
-    block = Block("hello world", 1)
-    print(block)
     blockchain = Blockchain()
-    blockchain.add(block)
-    print(blockchain)
+    database = ["hello world", "what's up", "hello", "bye"]
+
+    num = 0
+    for data in database:
+        num += 1
+        blockchain.mine(Block(data, num))
+
+    for block in blockchain.chain:
+        print(block)
 
 
 if __name__ == "__main__":
